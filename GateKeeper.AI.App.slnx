@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Project Path="GateKeeper.AI.App/GateKeeper.AI.App.csproj" />
+  <Project Path="GateKeeper.AI.Orchestrator/GateKeeper.AI.Orchestrator.csproj" />
+  <Project Path="GateKeeper.AI.Shared/GateKeeper.AI.Shared.csproj" />
+  <Project Path="GateKeeper.AI.SmartCodeReviewer.Agent/GateKeeper.AI.SmartCodeReviewer.Agent.csproj" />
+  <Project Path="GateKeeper.AI.TagAndChangeLog.Agent/GateKeeper.AI.TagAndChangeLog.Agent.csproj" />
+</Solution>

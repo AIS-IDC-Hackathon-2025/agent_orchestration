@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>ab146279-670c-454a-9c3a-ed742bd4a084</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GateKeeper.AI.Orchestrator\GateKeeper.AI.Orchestrator.csproj" />
+    <ProjectReference Include="..\GateKeeper.AI.Shared\GateKeeper.AI.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.12.0" />
+  </ItemGroup>
+
+</Project>

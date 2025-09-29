@@ -1,0 +1,48 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GateKeeper.AI.App", "GateKeeper.AI.App\GateKeeper.AI.App.csproj", "{FDAC1FF7-77E0-BD79-C074-A319FFF9F598}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GateKeeper.AI.Orchestrator", "GateKeeper.AI.Orchestrator\GateKeeper.AI.Orchestrator.csproj", "{CBB6A532-A4A9-14A0-91EE-23F9BCDA3755}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GateKeeper.AI.Shared", "GateKeeper.AI.Shared\GateKeeper.AI.Shared.csproj", "{C495FFE8-6C47-447C-9B2F-04915CC7EA25}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GateKeeper.AI.SmartCodeReviewer.Agent", "GateKeeper.AI.SmartCodeReviewer.Agent\GateKeeper.AI.SmartCodeReviewer.Agent.csproj", "{94E49E3B-C52C-D518-6ED5-3947897EDF62}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GateKeeper.AI.TagAndChangeLog.Agent", "GateKeeper.AI.TagAndChangeLog.Agent\GateKeeper.AI.TagAndChangeLog.Agent.csproj", "{0A13CA41-98BE-CECB-861B-0746DE7ECB58}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FDAC1FF7-77E0-BD79-C074-A319FFF9F598}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDAC1FF7-77E0-BD79-C074-A319FFF9F598}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDAC1FF7-77E0-BD79-C074-A319FFF9F598}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDAC1FF7-77E0-BD79-C074-A319FFF9F598}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBB6A532-A4A9-14A0-91EE-23F9BCDA3755}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBB6A532-A4A9-14A0-91EE-23F9BCDA3755}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBB6A532-A4A9-14A0-91EE-23F9BCDA3755}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBB6A532-A4A9-14A0-91EE-23F9BCDA3755}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C495FFE8-6C47-447C-9B2F-04915CC7EA25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C495FFE8-6C47-447C-9B2F-04915CC7EA25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C495FFE8-6C47-447C-9B2F-04915CC7EA25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C495FFE8-6C47-447C-9B2F-04915CC7EA25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94E49E3B-C52C-D518-6ED5-3947897EDF62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94E49E3B-C52C-D518-6ED5-3947897EDF62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94E49E3B-C52C-D518-6ED5-3947897EDF62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94E49E3B-C52C-D518-6ED5-3947897EDF62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A13CA41-98BE-CECB-861B-0746DE7ECB58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A13CA41-98BE-CECB-861B-0746DE7ECB58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A13CA41-98BE-CECB-861B-0746DE7ECB58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A13CA41-98BE-CECB-861B-0746DE7ECB58}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2BEE0C37-9506-4372-ADD1-2D94D67943A2}
+	EndGlobalSection
+EndGlobal
