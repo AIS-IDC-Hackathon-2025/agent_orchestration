@@ -7,4 +7,5 @@
   <Project Path="GateKeeper.AI.Shared/GateKeeper.AI.Shared.csproj" />
   <Project Path="GateKeeper.AI.SmartCodeReviewer.Agent/GateKeeper.AI.SmartCodeReviewer.Agent.csproj" />
   <Project Path="GateKeeper.AI.TagAndChangeLog.Agent/GateKeeper.AI.TagAndChangeLog.Agent.csproj" />
+  <Project Path="GateKeeper.AI.Trust.Agent/GateKeeper.AI.Trust.Agent.csproj" Id="1ec65bb0-aba5-4717-84f3-08e7e5268e0a" />
 </Solution>
