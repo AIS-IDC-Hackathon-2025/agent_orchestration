@@ -1,5 +1,4 @@
 ﻿using GateKeeper.AI.Shared.Models;
-using Microsoft.SemanticKernel;
 using System.ComponentModel;
 using System.Text.Json;
 using static GateKeeper.AI.Shared.Settings;
@@ -14,19 +13,6 @@ public class TrustAgentGitHubPlugin
     {
         _gitHubSettings = gitHubSettings;
     }
-
-    //// Common CodeQL workflow filename candidates (with and without full path)
-    //private static readonly string[] s_codeQlWorkflowCandidates =
-    //[
-    //    "codeql.yml",
-    //    "codeql.yaml",
-    //    "codeql-analysis.yml",
-    //    "codeql-analysis.yaml",
-    //    ".github/workflows/codeql.yml",
-    //    ".github/workflows/codeql.yaml",
-    //    ".github/workflows/codeql-analysis.yml",
-    //    ".github/workflows/codeql-analysis.yaml"
-    //];
 
     // 1. Dependency & Vulnerability Alerts
     // GET /repos/{owner}/{repo}/dependabot/alerts

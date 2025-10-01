@@ -2,39 +2,18 @@
 
 public interface ITrustAgent
 {
-    Task<(Kernel, ChatCompletionAgent)> CreateAgentAsync();
+    ChatCompletionAgent CreateAgent(Kernel agentKernel);
 }
 
 public class TrustAgent : ITrustAgent
 {
-    private readonly Settings _settings;
-
-    public TrustAgent(Settings settings)
+    public ChatCompletionAgent CreateAgent(Kernel agentKernel)
     {
-        _settings = settings;
-    }
-
-    public async Task<(Kernel, ChatCompletionAgent)> CreateAgentAsync()
-    {
-        TrustAgentGitHubPlugin githubPlugin = new(_settings.GitSettings);
-
-        IKernelBuilder builder = Kernel.CreateBuilder();
-
-        builder.AddAzureOpenAIChatCompletion(
-           deploymentName: _settings.AzureOpenAI.ChatModelDeployment,
-           endpoint: _settings.AzureOpenAI.Endpoint,
-           apiKey: _settings.AzureOpenAI.ApiKey);
-
-        builder.Plugins.AddFromObject(githubPlugin);
-
-        Kernel kernel = builder.Build(); 
-        
-        ChatCompletionAgent agent =
-            new()
-            {
-                Kernel = kernel,
-                Name = "SampleAssistantAgent",
-                Instructions =
+        var agent = new ChatCompletionAgent
+        {
+            Kernel = agentKernel,
+            Name = "SampleAssistantAgent",
+            Instructions =
                         """
                             You are an autonomous code review and security analysis agent for a single GitHub repository.
 
@@ -144,10 +123,10 @@ public class TrustAgent : ITrustAgent
 
                             The current date and time is: {{$now}}.
                         """,
-                Arguments = new KernelArguments(new AzureOpenAIPromptExecutionSettings() { FunctionChoiceBehavior = FunctionChoiceBehavior.Auto() }) { }
-            };
+            Arguments = new KernelArguments(new AzureOpenAIPromptExecutionSettings() { FunctionChoiceBehavior = FunctionChoiceBehavior.Auto() }) { }
+        };
 
-        return (kernel, agent);
+        return agent;
     }
 }
 
