@@ -19,10 +19,14 @@
 
     private async Task IncrementCount()
     {
-		//await OrchestratorService.Create("create new tag v1.2.660 and generate the release log and push to main on repo copilot_security"); 
-        OrchestratorService.Create("report all the vulnerabilities int the repo copilot_security");
+		//await OrchestratorService.Create("create new tag v1.2.661 and generate the release log and push to main on repo copilot_security"); 
 
-       // await OrchestratorService.TestAgent("create tag v1.2.505 on repo copilot_security");
+        //await OrchestratorService.Create("do a smart code review of latest PR on repo copilot_security");
+        //OrchestratorService.Create("report all the vulnerabilities int the repo copilot_security");
+
+       // await OrchestratorService.TestAgent("create tag v1.2.503 and generate release notes and push it to main on repo copilot_security");
+
+        await OrchestratorService.TestAgent("do the code review of latest pull request the repo copilot_security");
         
         currentCount++;
     }

@@ -38,20 +38,20 @@ public class OrchestratorService(
     public async Task TestAgent(string message)
     {
 
-        var (kernel, agent) = await tagAgent.CreateAgent();
+       // var (kernel, agent) = await tagAgent.CreateAgent();
         ChatHistoryAgentThread agentThread = new();
-        await foreach (ChatMessageContent response in agent.InvokeAsync(message, agentThread))
-        {
-            // Display response.
-            Console.WriteLine($"{response.Content}");
-        }
-
-        //var (kernel, agent, thread) = await smartCRAgent.CreateAgent();
-        //await foreach (ChatMessageContent response in agent.InvokeAsync(message, thread))
+        //await foreach (ChatMessageContent response in agent.InvokeAsync(message, agentThread))
         //{
         //    // Display response.
         //    Console.WriteLine($"{response.Content}");
         //}
+
+        var (kernel, agent, thread) = await smartCRAgent.CreateAgent();
+        await foreach (ChatMessageContent response in agent.InvokeAsync(message, thread))
+        {
+            // Display response.
+            Console.WriteLine($"{response.Content}");
+        }
 
 
 
@@ -61,7 +61,6 @@ public class OrchestratorService(
     {
         var builder = Kernel.CreateBuilder();
         builder.Services.AddSingleton(loggerFactory);
-
         var tagAndChangeLogAgent = await tagAgent.CreateAgent();
         _tagKernel = tagAndChangeLogAgent.Item1;
         var crAgent = await smartCRAgent.CreateAgent();
@@ -87,8 +86,10 @@ public class OrchestratorService(
             MaximumInvocationCount = 5,
         };
 
-        //crAgent.Item2 
-        _orchestration = new(_manager, tagAndChangeLogAgent.Item2, crAgent.Item2)
+        //
+        //
+        //, tagAndChangeLogAgent.Item2 
+        _orchestration = new(_manager, crAgent.Item2)
         {
             LoggerFactory = loggerFactory,
             ResponseCallback = monitor.ResponseCallback,
