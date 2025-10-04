@@ -43,7 +43,7 @@ using var loggerFactory = LoggerFactory.Create(builder =>
         options.IncludeFormattedMessage = true;
         options.IncludeScopes = true;
     });
-    builder.SetMinimumLevel(LogLevel.Information);
+    builder.SetMinimumLevel(LogLevel.Trace);
 });
 builder.Services.AddSingleton(loggerFactory);
 builder.Services.AddServices(builder.Configuration);

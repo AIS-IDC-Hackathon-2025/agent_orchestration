@@ -417,8 +417,8 @@ public sealed class GitHubPlugin(Settings settings)
         var markdownContent = await GenerateMarkdownChangeLogAsync(organization, repo, fromTag, toTag);
 
         // Create filename with timestamp
-        var fileName = $"changelog_{DateTime.Now:yyyyMMdd_HHmmss}.md";
-        var filePath = $"ReleaseNotes/{fileName}";
+        var fileName = $"changelog_{toTag}_{DateTime.Now:yyyyMMdd_HHmmss}.md";
+        var filePath = $"Releases/{fileName}";
 
         Console.WriteLine($"📝 Creating changelog in repository: {organization}/{repo}");
         Console.WriteLine($"📄 File path: {filePath}");

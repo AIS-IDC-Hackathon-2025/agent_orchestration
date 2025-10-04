@@ -45,7 +45,7 @@ public class McpClientHost(string gitHubToken) : IMcpClientHost
                 Console.WriteLine($"  • {tool.Name}: {tool.Description}");
             }
         }
-        //Where(x=>x.Name.Contains("pull_request"))
+        //Where(x => x.Name.Contains("pull_request")).
         return tools.ToList();
     }
 }

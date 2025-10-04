@@ -26,6 +26,7 @@ namespace GateKeeper.AI.TagAndChangeLog.Agent
             GitHubPlugin githubPlugin = new(settings);
 
             IKernelBuilder builder = Kernel.CreateBuilder();
+            builder.Services.AddSingleton(loggerFactory);
             builder.AddAzureOpenAIChatCompletion(
                 deploymentName: settings.AzureOpenAI.ChatModelDeployment,
                 endpoint: settings.AzureOpenAI.Endpoint,
