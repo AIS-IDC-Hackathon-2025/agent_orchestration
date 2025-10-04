@@ -1,8 +1,12 @@
 ﻿@page "/counter"
 @using GateKeeper.AI.UI.Services
 @using Microsoft.SemanticKernel
-@using Microsoft.SemanticKernel.Agents.Orchestration.Concurrent
+@using Microsoft.SemanticKernel.Agents.Magentic
+@using Microsoft.SemanticKernel.Agents.Orchestration
 @using Microsoft.SemanticKernel.Agents.Runtime.InProcess
+@using Microsoft.SemanticKernel.ChatCompletion
+@using Microsoft.SemanticKernel.Connectors.AzureOpenAI
+@inject IConfiguration Configuration
 
 <PageTitle>Counter</PageTitle>
 
@@ -10,50 +14,142 @@
 
 <p role="status">Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="IncrementCount" disabled="@_isRunning">
+    @(_isRunning ? "Running..." : "Click me")
+</button>
+
+@if (!string.IsNullOrWhiteSpace(_answer))
+{
+    <h3>Orchestration Result</h3>
+    <pre>@_answer</pre>
+}
+@if (_messages.Count > 0)
+{
+    <h4>Conversation Trace</h4>
+    <ul>
+        @foreach (var m in _messages)
+        {
+            <li><strong>@m.role:</strong> @m.content</li>
+        }
+    </ul>
+}
+@if (!string.IsNullOrEmpty(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
 
 @code {
     private int currentCount = 0;
+    private string? _answer;
+    private string? _error;
+    private bool _isRunning;
+    private readonly List<(string role, string content)> _messages = new();
+
+    // private void IncrementCount()
+    // {
+    //     currentCount++;
+    //     Task.Run(async () => { await StartMagicAsync(); });
+    // }
 
     private async Task IncrementCount()
     {
         currentCount++;
-        await Start();
+        await StartMagicAsync();
     }
 
-    private async Task Start()
+    private async Task StartMagicAsync()
     {
-        // Step 3: Set Up Concurrent Orchestration        
-        var builder = Kernel.CreateBuilder();
+        _error = null;
+        _answer = null;
+        _messages.Clear();
+        _isRunning = true;
 
-        builder.AddAzureOpenAIChatCompletion(
-            deploymentName: "gpt-4.1-mini",
-            endpoint: "https://gk-hack2025-openai.openai.azure.com/",
-            apiKey: "BA4pgncdrJacz6EsVgmDxfh7SmDcRvSUvG74yga0Z98PRKH7zX3mJQQJ99BIACYeBjFXJ3w3AAABACOG4F67");
+        await InvokeAsync(StateHasChanged);
 
-        var kernel = builder.Build();
+        // Load configuration (ensure you have these keys in appsettings or user secrets)
+        var endpoint = Configuration["AzureOpenAI:Endpoint"];
+        var deployment = Configuration["AzureOpenAI:ChatModelDeployment"];
+        var apiKey = Configuration["AzureOpenAI:ApiKey"];
 
-
-        var physicsAgent = AgentSetup.CreatePhysicsAgent(kernel);
-        var chemistryAgent = AgentSetup.CreateChemistryAgent(kernel);
-
-        var orchestration = new ConcurrentOrchestration(physicsAgent, chemistryAgent);
-
-        // Step 4: Start the Runtime
-        var runtime = new InProcessRuntime();
-        await runtime.StartAsync();
-
-        // Step 5: Invoke the Orchestration and Await Results
-        var result = await orchestration.InvokeAsync("What is temperature?", runtime);
-        string[] outputs = await result.GetValueAsync(TimeSpan.FromSeconds(20));
-
-        foreach (var output in outputs)
+        if (string.IsNullOrWhiteSpace(endpoint) ||
+            string.IsNullOrWhiteSpace(deployment) ||
+            string.IsNullOrWhiteSpace(apiKey))
         {
-            Console.WriteLine(output);
+            _error = "Azure OpenAI settings missing. Configure AzureOpenAI:Endpoint, ChatModelDeployment, ApiKey.";
+            _isRunning = false;
+            return;
         }
 
-        // Step 6: Stop the Runtime(Cleanup)
-        await runtime.RunUntilIdleAsync();
+        try
+        {
+            var builder = Kernel.CreateBuilder();
+            builder.AddAzureOpenAIChatCompletion(
+                deploymentName: deployment,
+                endpoint: endpoint,
+                apiKey: apiKey);
 
+            var kernel = builder.Build();
+
+            // Manager with basic execution settings
+            var manager = new StandardMagenticManager(
+                kernel.GetRequiredService<IChatCompletionService>(),
+                new AzureOpenAIPromptExecutionSettings
+                {
+                    // You can tune temperature/top_p/etc. if needed
+                })
+            {
+                MaximumInvocationCount = 8, // allow a few more turns
+                // Instructions =
+                //     "You are the orchestration manager. Collaborate with domain experts to answer the user question clearly. " +
+                //     "Stop when a concise, correct final answer is produced."
+            };
+
+            var physicsAgent = AgentSetup.CreatePhysicsAgent(kernel);
+            var chemistryAgent = AgentSetup.CreateChemistryAgent(kernel);
+
+            var orchestration = new MagenticOrchestration(manager, physicsAgent, chemistryAgent)
+            {
+                ResponseCallback = async (response) =>
+                {
+                    // Simple trace capturing
+                    _messages.Add((response.AuthorName ?? "", response.Content ?? ""));
+                    await InvokeAsync(StateHasChanged);
+                }
+            };
+
+            var runtime = new InProcessRuntime();
+            await runtime.StartAsync();
+
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(120)); // overarching guard
+            var prompt = "What is Kinetic Energy?";
+            //var prompt = "What is CO2?";
+            //var orchestrationResult = await orchestration.InvokeAsync(prompt, runtime, cts.Token);
+            var orchestrationResult = await orchestration.InvokeAsync(prompt, runtime);
+
+            // Allow up to 90s for final value (adjust as needed)
+            //var value = await orchestrationResult.GetValueAsync(TimeSpan.FromSeconds(90), cts.Token);
+            var value = await orchestrationResult.GetValueAsync();
+            _answer = value;
+
+            // Optional: ensure everything flushed
+            await runtime.RunUntilIdleAsync();
+        }
+        catch (TimeoutException tex)
+        {
+            _error = $"Timed out waiting for orchestration result: {tex.Message}. Increase timeout or reduce complexity.";
+        }
+        catch (OperationCanceledException)
+        {
+            _error = "Operation canceled (timeout or external cancellation).";
+        }
+        catch (Exception ex)
+        {
+            _error = $"Unexpected error: {ex.Message}";
+        }
+        finally
+        {
+            _isRunning = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 }
