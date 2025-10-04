@@ -1,4 +1,8 @@
 ﻿@page "/counter"
+@using GateKeeper.AI.UI.Services
+@using Microsoft.SemanticKernel
+@using Microsoft.SemanticKernel.Agents.Orchestration.Concurrent
+@using Microsoft.SemanticKernel.Agents.Runtime.InProcess
 
 <PageTitle>Counter</PageTitle>
 
@@ -11,8 +15,45 @@
 @code {
     private int currentCount = 0;
 
-    private void IncrementCount()
+    private async Task IncrementCount()
     {
         currentCount++;
+        await Start();
+    }
+
+    private async Task Start()
+    {
+        // Step 3: Set Up Concurrent Orchestration        
+        var builder = Kernel.CreateBuilder();
+
+        builder.AddAzureOpenAIChatCompletion(
+            deploymentName: "gpt-4.1-mini",
+            endpoint: "https://gk-hack2025-openai.openai.azure.com/",
+            apiKey: "BA4pgncdrJacz6EsVgmDxfh7SmDcRvSUvG74yga0Z98PRKH7zX3mJQQJ99BIACYeBjFXJ3w3AAABACOG4F67");
+
+        var kernel = builder.Build();
+
+
+        var physicsAgent = AgentSetup.CreatePhysicsAgent(kernel);
+        var chemistryAgent = AgentSetup.CreateChemistryAgent(kernel);
+
+        var orchestration = new ConcurrentOrchestration(physicsAgent, chemistryAgent);
+
+        // Step 4: Start the Runtime
+        var runtime = new InProcessRuntime();
+        await runtime.StartAsync();
+
+        // Step 5: Invoke the Orchestration and Await Results
+        var result = await orchestration.InvokeAsync("What is temperature?", runtime);
+        string[] outputs = await result.GetValueAsync(TimeSpan.FromSeconds(20));
+
+        foreach (var output in outputs)
+        {
+            Console.WriteLine(output);
+        }
+
+        // Step 6: Stop the Runtime(Cleanup)
+        await runtime.RunUntilIdleAsync();
+
     }
 }
