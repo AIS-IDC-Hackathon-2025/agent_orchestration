@@ -107,7 +107,8 @@
             var physicsAgent = AgentSetup.CreatePhysicsAgent(kernel);
             var chemistryAgent = AgentSetup.CreateChemistryAgent(kernel);
 
-            var orchestration = new MagenticOrchestration(manager, physicsAgent, chemistryAgent)
+            //var orchestration = new MagenticOrchestration(manager, physicsAgent, chemistryAgent)
+            var orchestration = new MagenticOrchestration(manager, physicsAgent)
             {
                 ResponseCallback = async (response) =>
                 {
