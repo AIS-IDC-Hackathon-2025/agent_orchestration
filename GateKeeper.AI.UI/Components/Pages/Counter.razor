@@ -67,15 +67,15 @@
         await InvokeAsync(StateHasChanged);
 
         // Load configuration (ensure you have these keys in appsettings or user secrets)
-        var endpoint = Configuration["AzureOpenAI:Endpoint"];
-        var deployment = Configuration["AzureOpenAI:ChatModelDeployment"];
-        var apiKey = Configuration["AzureOpenAI:ApiKey"];
+        var endpoint = Configuration["AzureOpenAISettings:Endpoint"];
+        var deployment = Configuration["AzureOpenAISettings:ChatModelDeployment"];
+        var apiKey = Configuration["AzureOpenAISettings:ApiKey"];
 
         if (string.IsNullOrWhiteSpace(endpoint) ||
             string.IsNullOrWhiteSpace(deployment) ||
             string.IsNullOrWhiteSpace(apiKey))
         {
-            _error = "Azure OpenAI settings missing. Configure AzureOpenAI:Endpoint, ChatModelDeployment, ApiKey.";
+            _error = "Azure OpenAI settings missing. Configure AzureOpenAISettings:Endpoint, ChatModelDeployment, ApiKey.";
             _isRunning = false;
             return;
         }
