@@ -63,8 +63,8 @@
                                 <span class="visually-hidden">Failed</span>
                                 break;
                             default: // Pending
-                                <i class="@(isActive ? "bi bi-play-fill" : "bi bi-square")" aria-hidden="true"></i>
-                                <span class="visually-hidden">Pending</span>
+                                     <i class="@(isActive ? "bi bi-play-fill" : "bi bi-square")" aria-hidden="true"></i>
+                                     <span class="visually-hidden">Pending</span>
                                 break;
                         }
                     </span>
@@ -123,7 +123,7 @@
     private CancellationTokenSource? _cts;
 
     private bool IsBusy => CurrentIndex < Steps.Count && Steps[CurrentIndex].Status == StepStatus.InProgress;
-    
+
     private string? StatusMessage;
 
     private int CompletedCount => Steps.Count(s => s.Status == StepStatus.Completed);
@@ -146,22 +146,22 @@
     private string CssFor(PipelineStep step, bool isActive) =>
         step.Status switch
         {
-            StepStatus.Pending    => isActive ? "pending active" : "pending",
+            StepStatus.Pending => isActive ? "pending active" : "pending",
             StepStatus.InProgress => "in-progress",
-            StepStatus.Completed  => "completed",
-            StepStatus.Failed     => "failed",
+            StepStatus.Completed => "completed",
+            StepStatus.Failed => "failed",
             _ => ""
         };
 
     private async Task NextAsync()
     {
         if (AllDone || IsBusy)
-        return;
+            return;
 
         var step = Steps[CurrentIndex];
 
-        if (step.Status != StepStatus.Pending) 
-        return;
+        if (step.Status != StepStatus.Pending)
+            return;
 
         _cts?.Cancel();
         _cts = new CancellationTokenSource();
@@ -200,8 +200,8 @@
 
     private void Reset()
     {
-        if (IsBusy) 
-        return;
+        if (IsBusy)
+            return;
 
         _cts?.Cancel();
 
