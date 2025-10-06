@@ -119,14 +119,19 @@
     ];
 
     private int CurrentIndex { get; set; } = 0;
+
     private CancellationTokenSource? _cts;
+
     private bool IsBusy => CurrentIndex < Steps.Count && Steps[CurrentIndex].Status == StepStatus.InProgress;
+    
     private string? StatusMessage;
 
     private int CompletedCount => Steps.Count(s => s.Status == StepStatus.Completed);
+
     private double ProgressPercent => (double)CompletedCount / Steps.Count * 100d;
 
     private bool AllDone => CompletedCount == Steps.Count;
+
     private bool CanClickNext =>
         !IsBusy &&
         !AllDone &&
@@ -156,9 +161,13 @@
 
     private async Task NextAsync()
     {
-        if (AllDone || IsBusy) return;
+        if (AllDone || IsBusy)
+        return;
+
         var step = Steps[CurrentIndex];
-        if (step.Status != StepStatus.Pending) return;
+
+        if (step.Status != StepStatus.Pending) 
+        return;
 
         _cts?.Cancel();
         _cts = new CancellationTokenSource();
@@ -173,6 +182,7 @@
 
             step.Status = StepStatus.Completed;
             StatusMessage = $"{step.Name} completed successfully.";
+
             if (CurrentIndex < Steps.Count - 1)
                 CurrentIndex++;
             else
@@ -196,16 +206,22 @@
 
     private void GoBack()
     {
-        if (!CanGoBack) return;
+        if (!CanGoBack) 
+        return;
+
         CurrentIndex--;
     }
 
     private void Reset()
     {
-        if (IsBusy) return;
+        if (IsBusy) 
+        return;
+
         _cts?.Cancel();
+
         foreach (var s in Steps)
             s.Status = StepStatus.Pending;
+
         CurrentIndex = 0;
         StatusMessage = "Pipeline reset.";
     }
