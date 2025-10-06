@@ -1,0 +1,234 @@
+﻿@page "/agents"
+
+<h3 class="mb-4">Pipeline Processor</h3>
+
+<div class="pipeline-steps mb-4">
+    @for (int i = 0; i < Steps.Count; i++)
+    {
+        var step = Steps[i];
+        var isActive = i == CurrentIndex;
+
+        <div class="pipeline-step">
+            <div class="step-wrapper">
+                <div class="step-box @(CssFor(step, isActive))" title="@step.Name" aria-current="@(isActive ? "step" : null)">
+                    <span class="status-icon">
+                        @switch (step.Status)
+                        {
+                            case StepStatus.InProgress:
+                                <div class="spinner-border spinner-border-sm text-light" role="status">
+                                    <span class="visually-hidden">In Progress</span>
+                                </div>
+                                break;
+                            case StepStatus.Completed:
+                                <i class="bi bi-check-circle-fill text-white" aria-hidden="true"></i>
+                                <span class="visually-hidden">Completed</span>
+                                break;
+                            case StepStatus.Failed:
+                                <i class="bi bi-x-circle-fill text-white" aria-hidden="true"></i>
+                                <span class="visually-hidden">Failed</span>
+                                break;
+                            default: // Pending
+                                     <i class="@(isActive ? "bi bi-play-fill" : "bi bi-square")" aria-hidden="true"></i>
+                                     <span class="visually-hidden">Pending</span>
+                                break;
+                        }
+                    </span>
+                </div>
+                <div class="step-label @(isActive ? "fw-semibold" : "")">
+                    @step.Name
+                </div>
+            </div>
+
+            @if (i < Steps.Count - 1)
+            {
+                <div class="connector-right @(step.Status == StepStatus.Completed ? "completed" : "")"></div>
+            }
+        </div>
+    }
+</div>
+
+<div class="progress mb-4" style="height: 8px;">
+    <div class="progress-bar bg-success"
+         role="progressbar"
+         style="width: @ProgressPercent%"
+         aria-valuenow="@ProgressPercent"
+         aria-valuemin="0"
+         aria-valuemax="100">
+    </div>
+</div>
+
+<div class="d-flex gap-2">
+    <button class="btn btn-secondary"
+            @onclick="GoBack"
+            disabled="@(!CanGoBack)">
+        <i class="bi bi-arrow-left-short"></i> Previous
+    </button>
+
+    <button class="btn btn-primary"
+            @onclick="NextAsync"
+            disabled="@(!CanClickNext)">
+        @if (IsBusy)
+        {
+            <div class="spinner-border spinner-border-sm me-1" role="status">
+                <span class="visually-hidden">Running...</span>
+            </div>
+        }
+        else if (AllDone)
+        {
+            <i class="bi bi-flag-fill me-1"></i>
+        }
+        else
+        {
+            <i class="bi bi-play-fill me-1"></i>
+        }
+        @NextButtonText
+    </button>
+
+    <button class="btn btn-outline-danger ms-auto"
+            @onclick="Reset"
+            disabled="@(IsBusy || CompletedCount == 0)">
+        <i class="bi bi-arrow-counterclockwise"></i> Reset
+    </button>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(StatusMessage))
+{
+    <div class="mt-3 small text-muted">
+        <i class="bi bi-info-circle me-1"></i>@StatusMessage
+    </div>
+}
+
+@code {
+    private enum StepStatus { Pending, InProgress, Completed, Failed }
+
+    private sealed class PipelineStep
+    {
+        public string Name { get; }
+        public StepStatus Status { get; set; } = StepStatus.Pending;
+        public PipelineStep(string name) => Name = name;
+    }
+
+    private readonly List<PipelineStep> Steps =
+    [
+        new("Initialize"),
+        new("Restore"),
+        new("Build"),
+        new("Test"),
+        new("Package"),
+        new("Deploy")
+    ];
+
+    private int CurrentIndex { get; set; } = 0;
+
+    private CancellationTokenSource? _cts;
+
+    private bool IsBusy => CurrentIndex < Steps.Count && Steps[CurrentIndex].Status == StepStatus.InProgress;
+
+    private string? StatusMessage;
+
+    private int CompletedCount => Steps.Count(s => s.Status == StepStatus.Completed);
+
+    private double ProgressPercent => (double)CompletedCount / Steps.Count * 100d;
+
+    private bool AllDone => CompletedCount == Steps.Count;
+
+    private bool CanClickNext =>
+        !IsBusy &&
+        !AllDone &&
+        (CurrentIndex < Steps.Count &&
+         Steps[CurrentIndex].Status is StepStatus.Pending);
+
+    private bool CanGoBack =>
+        !IsBusy &&
+        CurrentIndex > 0 &&
+        CurrentIndex < Steps.Count &&
+        Steps[CurrentIndex].Status == StepStatus.Pending;
+
+    private string NextButtonText =>
+        AllDone ? "Done" :
+        IsBusy ? "Running..." :
+        "Next";
+
+    private string CssFor(PipelineStep step, bool isActive) =>
+        step.Status switch
+        {
+            StepStatus.Pending => isActive ? "pending active" : "pending",
+            StepStatus.InProgress => "in-progress",
+            StepStatus.Completed => "completed",
+            StepStatus.Failed => "failed",
+            _ => ""
+        };
+
+    private async Task NextAsync()
+    {
+        if (AllDone || IsBusy)
+            return;
+
+        var step = Steps[CurrentIndex];
+
+        if (step.Status != StepStatus.Pending)
+            return;
+
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        step.Status = StepStatus.InProgress;
+        StatusMessage = $"Starting {step.Name}...";
+        StateHasChanged();
+
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2.5), _cts.Token);
+
+            step.Status = StepStatus.Completed;
+            StatusMessage = $"{step.Name} completed successfully.";
+
+            if (CurrentIndex < Steps.Count - 1)
+                CurrentIndex++;
+            else
+                StatusMessage = "Pipeline finished.";
+        }
+        catch (TaskCanceledException)
+        {
+            StatusMessage = $"{step.Name} canceled.";
+            step.Status = StepStatus.Pending;
+        }
+        catch (Exception ex)
+        {
+            step.Status = StepStatus.Failed;
+            StatusMessage = $"{step.Name} failed: {ex.Message}";
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void GoBack()
+    {
+        if (!CanGoBack)
+            return;
+
+        CurrentIndex--;
+    }
+
+    private void Reset()
+    {
+        if (IsBusy)
+            return;
+
+        _cts?.Cancel();
+
+        foreach (var s in Steps)
+            s.Status = StepStatus.Pending;
+
+        CurrentIndex = 0;
+        StatusMessage = "Pipeline reset.";
+    }
+
+    public void Dispose()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+    }
+}
