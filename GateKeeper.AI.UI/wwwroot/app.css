@@ -13,7 +13,7 @@ a, .btn-link {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {
@@ -41,10 +41,9 @@ h1:focus {
     padding: 1rem 1rem 1rem 3.7rem;
     color: white;
 }
-
-    .blazor-error-boundary::after {
-        content: "An error has occurred."
-    }
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}
 
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
@@ -54,7 +53,6 @@ h1:focus {
     color: var(--bs-secondary-color);
     text-align: end;
 }
-
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
@@ -102,29 +100,29 @@ h1:focus {
     z-index: 2;
 }
 
-    .step-box.pending.active {
-        border-color: var(--bs-primary);
-        color: var(--bs-primary);
-        box-shadow: 0 0 0 4px rgba(var(--bs-primary-rgb), .15);
-    }
+.step-box.pending.active {
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
+    box-shadow: 0 0 0 4px rgba(var(--bs-primary-rgb), .15);
+}
 
-    .step-box.in-progress {
-        background: var(--bs-primary);
-        border-color: var(--bs-primary);
-        color: #fff;
-    }
+.step-box.in-progress {
+    background: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: #fff;
+}
 
-    .step-box.completed {
-        background: var(--bs-success);
-        border-color: var(--bs-success);
-        color: #fff;
-    }
+.step-box.completed {
+    background: var(--bs-success);
+    border-color: var(--bs-success);
+    color: #fff;
+}
 
-    .step-box.failed {
-        background: var(--bs-danger);
-        border-color: var(--bs-danger);
-        color: #fff;
-    }
+.step-box.failed {
+    background: var(--bs-danger);
+    border-color: var(--bs-danger);
+    color: #fff;
+}
 
 .step-label {
     margin-top: .5rem;
@@ -148,9 +146,9 @@ h1:focus {
     z-index: 1;
 }
 
-    .pipeline-step .connector-right.completed {
-        background: var(--bs-success);
-    }
+.pipeline-step .connector-right.completed {
+    background: var(--bs-success);
+}
 
 @media (max-width: 700px) {
     .step-box {
@@ -158,12 +156,10 @@ h1:focus {
         height: 48px;
         font-size: .8rem;
     }
-
     .step-label {
         font-size: .65rem;
         max-width: 70px;
     }
-
     .pipeline-step .connector-right {
         top: 24px;
     }
@@ -179,9 +175,6 @@ h1:focus {
 .spin {
     animation: spin 0.9s linear infinite;
 }
-
 @keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
 }
