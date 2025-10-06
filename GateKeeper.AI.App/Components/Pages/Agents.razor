@@ -1,6 +1,41 @@
-﻿@page "/agents"
+﻿@page "/"
+@page "/agents"
 
-<h3 class="mb-4">Pipeline Processor</h3>
+<h3 class="mb-4">Release Gatekeeper</h3>
+
+<div class="mb-3">
+    <label for="txtPrompt" class="form-label">Enter Prompt</label>
+    <textarea class="form-control" id="txtPrompt" rows="3"></textarea>
+</div>
+
+<div class="d-flex gap-2 my-4">
+
+    <button class="btn btn-primary"
+            @onclick="NextAsync"
+            disabled="@(!CanClickStart)">
+        @if (IsBusy)
+        {
+            <div class="spinner-border spinner-border-sm me-1" role="status">
+                <span class="visually-hidden">Running...</span>
+            </div>
+        }
+        else if (AllDone)
+        {
+            <i class="bi bi-flag-fill me-1"></i>
+        }
+        else
+        {
+            <i class="bi bi-play-fill me-1"></i>
+        }
+        @StartButtonText
+    </button>
+
+    <button class="btn btn-outline-danger ms-auto"
+            @onclick="Reset"
+            disabled="@(IsBusy || CompletedCount == 0)">
+        <i class="bi bi-arrow-counterclockwise"></i> Reset
+    </button>
+</div>
 
 <div class="pipeline-steps mb-4">
     @for (int i = 0; i < Steps.Count; i++)
@@ -57,39 +92,6 @@
     </div>
 </div>
 
-<div class="d-flex gap-2">
-    <button class="btn btn-secondary"
-            @onclick="GoBack"
-            disabled="@(!CanGoBack)">
-        <i class="bi bi-arrow-left-short"></i> Previous
-    </button>
-
-    <button class="btn btn-primary"
-            @onclick="NextAsync"
-            disabled="@(!CanClickNext)">
-        @if (IsBusy)
-        {
-            <div class="spinner-border spinner-border-sm me-1" role="status">
-                <span class="visually-hidden">Running...</span>
-            </div>
-        }
-        else if (AllDone)
-        {
-            <i class="bi bi-flag-fill me-1"></i>
-        }
-        else
-        {
-            <i class="bi bi-play-fill me-1"></i>
-        }
-        @NextButtonText
-    </button>
-
-    <button class="btn btn-outline-danger ms-auto"
-            @onclick="Reset"
-            disabled="@(IsBusy || CompletedCount == 0)">
-        <i class="bi bi-arrow-counterclockwise"></i> Reset
-    </button>
-</div>
 
 @if (!string.IsNullOrWhiteSpace(StatusMessage))
 {
@@ -111,11 +113,9 @@
     private readonly List<PipelineStep> Steps =
     [
         new("Initialize"),
-        new("Restore"),
-        new("Build"),
-        new("Test"),
-        new("Package"),
-        new("Deploy")
+        new("Tagging and Change log"),
+        new("Trust"),
+        new("Smar code review"),
     ];
 
     private int CurrentIndex { get; set; } = 0;
@@ -132,22 +132,16 @@
 
     private bool AllDone => CompletedCount == Steps.Count;
 
-    private bool CanClickNext =>
+    private bool CanClickStart =>
         !IsBusy &&
         !AllDone &&
         (CurrentIndex < Steps.Count &&
          Steps[CurrentIndex].Status is StepStatus.Pending);
 
-    private bool CanGoBack =>
-        !IsBusy &&
-        CurrentIndex > 0 &&
-        CurrentIndex < Steps.Count &&
-        Steps[CurrentIndex].Status == StepStatus.Pending;
-
-    private string NextButtonText =>
+    private string StartButtonText =>
         AllDone ? "Done" :
         IsBusy ? "Running..." :
-        "Next";
+        "Start";
 
     private string CssFor(PipelineStep step, bool isActive) =>
         step.Status switch
@@ -202,14 +196,6 @@
         {
             await InvokeAsync(StateHasChanged);
         }
-    }
-
-    private void GoBack()
-    {
-        if (!CanGoBack)
-            return;
-
-        CurrentIndex--;
     }
 
     private void Reset()

@@ -4,8 +4,8 @@
 <h3 class="mb-4">Release Gatekeeper</h3>
 
 <div class="mb-3">
-    <label for="exampleFormControlTextarea1" class="form-label">Enter Prompt</label>
-    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+    <label for="txtPrompt" class="form-label">Enter Prompt</label>
+    <textarea class="form-control" id="txtPrompt" rows="3"></textarea>
 </div>
 
 <div class="d-flex gap-2 my-4">
@@ -113,11 +113,9 @@
     private readonly List<PipelineStep> Steps =
     [
         new("Initialize"),
-        new("Tagging and Change log"), // Restore
-        new("Trust"), // Build
-        new("Smar code review"), // Test
-        //new("Package"),
-        //new("Deploy")
+        new("Tagging and Change log"),
+        new("Trust"),
+        new("Smar code review"),
     ];
 
     private int CurrentIndex { get; set; } = 0;
