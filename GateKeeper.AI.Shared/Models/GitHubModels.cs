@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 namespace GateKeeper.AI.Shared.Models;
 
@@ -433,5 +428,309 @@ public static class GitHubModels
 
         [JsonPropertyName("message")]
         public string Message { get; set; }
+    }
+
+    public class DependabotAlert
+    {
+        [JsonPropertyName("number")]
+        public int Number { get; set; }
+
+        [JsonPropertyName("state")]
+        public string State { get; set; }
+
+        [JsonPropertyName("dependency")]
+        public DependabotDependency Dependency { get; set; }
+
+        [JsonPropertyName("security_advisory")]
+        public DependabotSecurityAdvisory SecurityAdvisory { get; set; }
+
+        [JsonPropertyName("security_vulnerability")]
+        public DependabotSecurityVulnerability SecurityVulnerability { get; set; }
+
+        [JsonPropertyName("dismissed_at")]
+        public string DismissedAt { get; set; }
+
+        [JsonPropertyName("dismissed_by")]
+        public User DismissedBy { get; set; }
+
+        [JsonPropertyName("dismissed_reason")]
+        public string DismissedReason { get; set; }
+
+        [JsonPropertyName("html_url")]
+        public string Url { get; set; }
+
+        [JsonPropertyName("created_at")]
+        public string CreatedAt { get; set; }
+
+        [JsonPropertyName("updated_at")]
+        public string UpdatedAt { get; set; }
+
+        [JsonPropertyName("fixed_at")]
+        public string FixedAt { get; set; }
+
+        [JsonPropertyName("auto_dismissed_at")]
+        public string AutoDismissedAt { get; set; }
+
+        [JsonPropertyName("manifest_path")]
+        public string ManifestPath { get; set; }
+
+        [JsonPropertyName("scope")]
+        public string Scope { get; set; }
+    }
+
+    public sealed class DependabotDependency
+    {
+        [JsonPropertyName("package")]
+        public DependabotPackage Package { get; set; }
+
+        [JsonPropertyName("manifest_path")]
+        public string ManifestPath { get; set; }
+
+        [JsonPropertyName("scope")]
+        public string Scope { get; set; }
+    }
+
+    public sealed class DependabotPackage
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("ecosystem")]
+        public string Ecosystem { get; set; }
+    }
+
+    public sealed class DependabotSecurityAdvisory
+    {
+        [JsonPropertyName("ghsa_id")]
+        public string GhsaId { get; set; }
+
+        [JsonPropertyName("summary")]
+        public string Summary { get; set; }
+
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [JsonPropertyName("severity")]
+        public string Severity { get; set; }
+
+        [JsonPropertyName("cve_id")]
+        public string CveId { get; set; }
+
+        [JsonPropertyName("references")]
+        public DependabotReference[] References { get; set; }
+    }
+
+    public sealed class DependabotReference
+    {
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
+    }
+
+    public sealed class DependabotSecurityVulnerability
+    {
+        [JsonPropertyName("package")]
+        public DependabotPackage Package { get; set; }
+
+        [JsonPropertyName("vulnerable_version_range")]
+        public string VulnerableVersionRange { get; set; }
+
+        [JsonPropertyName("first_patched_version")]
+        public DependabotPatchedVersion FirstPatchedVersion { get; set; }
+
+        [JsonPropertyName("severity")]
+        public string Severity { get; set; }
+
+        [JsonPropertyName("updated_at")]
+        public string UpdatedAt { get; set; }
+    }
+
+    public sealed class DependabotPatchedVersion
+    {
+        [JsonPropertyName("identifier")]
+        public string Identifier { get; set; }
+    }
+
+    // Code Scanning models (GitHub Code Scanning Alert API)
+    public sealed class CodeScanningAlert
+    {
+        [JsonPropertyName("number")]
+        public int Number { get; set; }
+
+        [JsonPropertyName("state")]
+        public string State { get; set; }
+
+        [JsonPropertyName("created_at")]
+        public string CreatedAt { get; set; }
+
+        [JsonPropertyName("updated_at")]
+        public string UpdatedAt { get; set; }
+
+        [JsonPropertyName("dismissed_at")]
+        public string DismissedAt { get; set; }
+
+        [JsonPropertyName("dismissed_by")]
+        public User DismissedBy { get; set; }
+
+        [JsonPropertyName("dismissed_reason")]
+        public string DismissedReason { get; set; }
+
+        [JsonPropertyName("html_url")]
+        public string HtmlUrl { get; set; }
+
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
+
+        [JsonPropertyName("instances_url")]
+        public string InstancesUrl { get; set; }
+
+        [JsonPropertyName("rule")]
+        public CodeScanningRule Rule { get; set; }
+
+        [JsonPropertyName("tool")]
+        public CodeScanningTool Tool { get; set; }
+
+        [JsonPropertyName("most_recent_instance")]
+        public CodeScanningAlertInstance MostRecentInstance { get; set; }
+    }
+
+    public sealed class CodeScanningRule
+    {
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        // e.g. "warning", "error", "note"
+        [JsonPropertyName("severity")]
+        public string Severity { get; set; }
+
+        // e.g. "low", "medium", "high", "critical"
+        [JsonPropertyName("security_severity_level")]
+        public string SecuritySeverityLevel { get; set; }
+
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [JsonPropertyName("full_description")]
+        public string FullDescription { get; set; }
+
+        [JsonPropertyName("tags")]
+        public string[] Tags { get; set; }
+    }
+
+    public sealed class CodeScanningTool
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("version")]
+        public string Version { get; set; }
+
+        [JsonPropertyName("guid")]
+        public string Guid { get; set; }
+    }
+
+    public sealed class CodeScanningAlertInstance
+    {
+        [JsonPropertyName("ref")]
+        public string Ref { get; set; }
+
+        [JsonPropertyName("analysis_key")]
+        public string AnalysisKey { get; set; }
+
+        [JsonPropertyName("category")]
+        public string Category { get; set; }
+
+        [JsonPropertyName("classifications")]
+        public string[] Classifications { get; set; }
+
+        [JsonPropertyName("message")]
+        public CodeScanningMessage Message { get; set; }
+
+        [JsonPropertyName("location")]
+        public CodeScanningAlertLocation Location { get; set; }
+
+        [JsonPropertyName("html_url")]
+        public string HtmlUrl { get; set; }
+
+        [JsonPropertyName("fixed_at")]
+        public string FixedAt { get; set; }
+    }
+
+    public sealed class CodeScanningMessage
+    {
+        [JsonPropertyName("text")]
+        public string Text { get; set; }
+    }
+
+    public sealed class CodeScanningAlertLocation
+    {
+        [JsonPropertyName("path")]
+        public string Path { get; set; }
+
+        [JsonPropertyName("start_line")]
+        public int? StartLine { get; set; }
+
+        [JsonPropertyName("end_line")]
+        public int? EndLine { get; set; }
+
+        [JsonPropertyName("start_column")]
+        public int? StartColumn { get; set; }
+
+        [JsonPropertyName("end_column")]
+        public int? EndColumn { get; set; }
+    }
+
+    // Secret Scanning Alert models (GitHub Secret Scanning API)
+    public sealed class SecretScanningAlert
+    {
+        [JsonPropertyName("number")]
+        public int Number { get; set; }
+
+        [JsonPropertyName("state")]
+        public string State { get; set; }
+
+        [JsonPropertyName("secret_type")]
+        public string SecretType { get; set; }
+
+        [JsonPropertyName("secret_type_display_name")]
+        public string SecretTypeDisplayName { get; set; }
+
+        [JsonPropertyName("secret")]
+        public string Secret { get; set; }
+
+        [JsonPropertyName("resolution")]
+        public string Resolution { get; set; }
+
+        [JsonPropertyName("resolved_at")]
+        public string ResolvedAt { get; set; }
+
+        [JsonPropertyName("resolved_by")]
+        public User ResolvedBy { get; set; }
+
+        [JsonPropertyName("push_protection_bypassed")]
+        public bool? PushProtectionBypassed { get; set; }
+
+        [JsonPropertyName("push_protection_bypassed_by")]
+        public User PushProtectionBypassedBy { get; set; }
+
+        [JsonPropertyName("push_protection_bypassed_at")]
+        public string PushProtectionBypassedAt { get; set; }
+
+        [JsonPropertyName("html_url")]
+        public string HtmlUrl { get; set; }
+
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
+
+        [JsonPropertyName("locations_url")]
+        public string LocationsUrl { get; set; }
+
+        [JsonPropertyName("created_at")]
+        public string CreatedAt { get; set; }
+
+        [JsonPropertyName("updated_at")]
+        public string UpdatedAt { get; set; }
     }
 }

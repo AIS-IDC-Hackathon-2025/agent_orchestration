@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System.Reflection;
 
 namespace GateKeeper.AI.Shared;
 
 public class Settings
 {
     private readonly IConfiguration configRoot;
+
     public Settings(IConfiguration config)
     {
         configRoot = config;
@@ -15,6 +15,7 @@ public class Settings
     private OpenAISettings openAI;
 
     public AzureOpenAISettings AzureOpenAI => this.azureOpenAI ??= this.GetSettings<Settings.AzureOpenAISettings>();
+
     public OpenAISettings OpenAI => this.openAI ??= this.GetSettings<Settings.OpenAISettings>();
 
     public GitHubSettings GitSettings => this.GetSettings<GitHubSettings>();
@@ -51,17 +52,6 @@ public class Settings
     }
     public TSettings GetSettings<TSettings>() =>
         this.configRoot.GetRequiredSection(typeof(TSettings).Name).Get<TSettings>()!;
-
-    //public Settings()
-    //{
-    //    this.configRoot =
-    //        new ConfigurationBuilder()
-    //            .SetBasePath(AppContext.BaseDirectory)
-    //            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-    //            .AddEnvironmentVariables()
-    //            .AddUserSecrets(Assembly.GetExecutingAssembly(), optional: true)
-    //            .Build();
-    //}
 }
 
 
