@@ -38,20 +38,20 @@ public class OrchestratorService(
     public async Task TestAgent(string message)
     {
 
-       // var (kernel, agent) = await tagAgent.CreateAgent();
+       var (kernel, agent) = await tagAgent.CreateAgent();
         ChatHistoryAgentThread agentThread = new();
-        //await foreach (ChatMessageContent response in agent.InvokeAsync(message, agentThread))
-        //{
-        //    // Display response.
-        //    Console.WriteLine($"{response.Content}");
-        //}
-
-        var (kernel, agent, thread) = await smartCRAgent.CreateAgent();
-        await foreach (ChatMessageContent response in agent.InvokeAsync(message, thread))
+        await foreach (ChatMessageContent response in agent.InvokeAsync(message, agentThread))
         {
             // Display response.
             Console.WriteLine($"{response.Content}");
         }
+
+        //var (kernel, agent, thread) = await smartCRAgent.CreateAgent();
+        //await foreach (ChatMessageContent response in agent.InvokeAsync(message, thread))
+        //{
+        //    // Display response.
+        //    Console.WriteLine($"{response.Content}");
+        //}
 
 
 

@@ -430,6 +430,7 @@ public static class GitHubModels
         public string Message { get; set; }
     }
 
+    #region Trust
     public class DependabotAlert
     {
         [JsonPropertyName("number")]
@@ -733,4 +734,328 @@ public static class GitHubModels
         [JsonPropertyName("updated_at")]
         public string UpdatedAt { get; set; }
     }
+
+    // License models (GitHub License API)
+    public sealed class License
+    {
+        [JsonPropertyName("key")]
+        public string Key { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("spdx_id")]
+        public string SpdxId { get; set; }
+
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
+
+        [JsonPropertyName("node_id")]
+        public string NodeId { get; set; }
+
+        [JsonPropertyName("html_url")]
+        public string HtmlUrl { get; set; }
+
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [JsonPropertyName("implementation")]
+        public string Implementation { get; set; }
+
+        [JsonPropertyName("permissions")]
+        public string[] Permissions { get; set; }
+
+        [JsonPropertyName("conditions")]
+        public string[] Conditions { get; set; }
+
+        [JsonPropertyName("limitations")]
+        public string[] Limitations { get; set; }
+
+        [JsonPropertyName("body")]
+        public string Body { get; set; }
+
+        [JsonPropertyName("featured")]
+        public bool Featured { get; set; }
+    }
+
+    // Dependency Graph comparison models (GitHub: dependency-graph/compare)
+    // Endpoint: GET /repos/{owner}/{repo}/dependency-graph/compare/{base}...{head}
+    // These classes intentionally model only documented/public fields and allow
+    // forward compatibility via nullable/optional properties.
+    public sealed class DependencyComparison
+    {
+        [JsonPropertyName("base_ref")]
+        public string BaseRef { get; set; }
+
+        [JsonPropertyName("head_ref")]
+        public string HeadRef { get; set; }
+
+        [JsonPropertyName("base_sha")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? BaseSha { get; set; }
+
+        [JsonPropertyName("head_sha")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? HeadSha { get; set; }
+
+        [JsonPropertyName("html_url")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? HtmlUrl { get; set; }
+
+        [JsonPropertyName("url")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? ApiUrl { get; set; }
+
+        // High‑level summary counts (if provided by GitHub)
+        [JsonPropertyName("total_additions")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? TotalAdditions { get; set; }
+
+        [JsonPropertyName("total_removals")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? TotalRemovals { get; set; }
+
+        [JsonPropertyName("total_changes")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? TotalChanges { get; set; }
+
+        [JsonPropertyName("diff")]
+        public DependencyDiff Diff { get; set; }
+    }
+
+    public sealed class DependencyDiff
+    {
+        [JsonPropertyName("added")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public DependencyRecord[]? Added { get; set; }
+
+        [JsonPropertyName("removed")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public DependencyRecord[]? Removed { get; set; }
+
+        [JsonPropertyName("changed")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public DependencyChange[]? Changed { get; set; }
+    }
+
+    // Represents a dependency that is only present in head (added) or only in base (removed)
+    public sealed class DependencyRecord
+    {
+        // Reuse DependabotPackage for package identification (ecosystem + name)
+        [JsonPropertyName("package")]
+        public DependabotPackage Package { get; set; }
+
+        [JsonPropertyName("manifest_path")]
+        public string ManifestPath { get; set; }
+
+        [JsonPropertyName("scope")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Scope { get; set; }
+
+        [JsonPropertyName("license")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public DependencyLicense? License { get; set; }
+
+        [JsonPropertyName("version")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Version { get; set; }
+    }
+
+    // Represents a dependency whose version changed between base and head
+    public sealed class DependencyChange
+    {
+        [JsonPropertyName("package")]
+        public DependabotPackage Package { get; set; }
+
+        [JsonPropertyName("manifest_path")]
+        public string ManifestPath { get; set; }
+
+        [JsonPropertyName("scope")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Scope { get; set; }
+
+        [JsonPropertyName("license")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public DependencyLicense? License { get; set; }
+
+        [JsonPropertyName("previous_version")]
+        public string PreviousVersion { get; set; }
+
+        [JsonPropertyName("new_version")]
+        public string NewVersion { get; set; }
+
+        // GitHub may provide a semver diff classification (e.g., "major","minor","patch")
+        [JsonPropertyName("change_type")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? ChangeType { get; set; }
+
+        [JsonPropertyName("version_comparison")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public VersionComparison? VersionComparison { get; set; }
+    }
+
+    public sealed class DependencyLicense
+    {
+        [JsonPropertyName("spdx_id")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? SpdxId { get; set; }
+
+        [JsonPropertyName("name")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Name { get; set; }
+    }
+
+    public sealed class VersionComparison
+    {
+        [JsonPropertyName("semver")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public SemVerComparison? SemVer { get; set; }
+    }
+
+    public sealed class SemVerComparison
+    {
+        // e.g., "major", "minor", "patch", or null if not semver
+        [JsonPropertyName("change_type")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? ChangeType { get; set; }
+    }
+
+    // Dependency Graph snapshot response (POST /repos/{owner}/{repo}/dependency-graph/snapshots)
+    // These models intentionally keep fields optional (nullable) for forward compatibility.
+    public sealed class DependencySnapshotResponse
+    {
+        [JsonPropertyName("id")]
+        public long Id { get; set; }
+
+        [JsonPropertyName("version")]
+        public int Version { get; set; }
+
+        [JsonPropertyName("created_at")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? CreatedAt { get; set; }
+
+        [JsonPropertyName("expires_at")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? ExpiresAt { get; set; }
+
+        [JsonPropertyName("sha")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Sha { get; set; }
+
+        // Git ref (e.g. refs/heads/main)
+        [JsonPropertyName("ref")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Ref { get; set; }
+
+        [JsonPropertyName("job")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public DependencySnapshotJob? Job { get; set; }
+
+        [JsonPropertyName("detector")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public DependencySnapshotDetector? Detector { get; set; }
+
+        // Arbitrary key/value metadata supplied when creating the snapshot
+        [JsonPropertyName("metadata")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public Dictionary<string, string>? Metadata { get; set; }
+
+        // Manifests keyed by manifest path (e.g. "src/Project.csproj", "package.json")
+        [JsonPropertyName("manifests")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public Dictionary<string, DependencySnapshotManifest>? Manifests { get; set; }
+
+        // When the API returns an error object instead of a normal snapshot (defensive)
+        [JsonPropertyName("message")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Message { get; set; }
+    }
+
+    public sealed class DependencySnapshotJob
+    {
+        [JsonPropertyName("id")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Id { get; set; }
+
+        [JsonPropertyName("correlator")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Correlator { get; set; }
+
+        [JsonPropertyName("html_url")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? HtmlUrl { get; set; }
+    }
+
+    public sealed class DependencySnapshotDetector
+    {
+        [JsonPropertyName("name")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Name { get; set; }
+
+        [JsonPropertyName("version")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Version { get; set; }
+
+        [JsonPropertyName("url")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Url { get; set; }
+    }
+
+    public sealed class DependencySnapshotManifest
+    {
+        [JsonPropertyName("name")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Name { get; set; }
+
+        [JsonPropertyName("file")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public DependencySnapshotFile? File { get; set; }
+
+        // Dependencies for this manifest keyed by package alias/name
+        [JsonPropertyName("dependencies")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public Dictionary<string, DependencySnapshotDependency>? Dependencies { get; set; }
+    }
+
+    public sealed class DependencySnapshotFile
+    {
+        // Path within the repo
+        [JsonPropertyName("source_location")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? SourceLocation { get; set; }
+    }
+
+    public sealed class DependencySnapshotDependency
+    {
+        // Package URL (purl) if supplied (e.g., pkg:npm/left-pad@1.0.0)
+        [JsonPropertyName("package_url")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? PackageUrl { get; set; }
+
+        // direct | indirect
+        [JsonPropertyName("relationship")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Relationship { get; set; }
+
+        // runtime | development | optional (etc.)
+        [JsonPropertyName("scope")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Scope { get; set; }
+
+        // Version string actually resolved
+        [JsonPropertyName("version")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Version { get; set; }
+
+        // Original requirements/range (if provided)
+        [JsonPropertyName("requirements")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Requirements { get; set; }
+
+        // Downstream dependencies (by name) this dependency brings in
+        [JsonPropertyName("dependencies")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string[]? Dependencies { get; set; }
+    }
+    #endregion
 }

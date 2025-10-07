@@ -1,6 +1,7 @@
 ﻿using Azure.AI.Agents.Persistent;
 using GateKeeper.AI.Shared;
 using GateKeeper.AI.Shared.MCP;
+using GateKeeper.AI.Shared.Plugin;
 using GateKeeper.AI.TagAndChangeLog.Agent.Plugin;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
