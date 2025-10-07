@@ -203,9 +203,12 @@ public partial class Agents : ComponentBase
     }
 
     [JSInvokable]
-    public void ChartCompletetionsStreamJs(string content)
+    public async Task ChartCompletetionsStreamJs(string content)
     {
         conversationHistory.Add(new ChatMessage(DateTime.Now, content!));
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
+        
+        // Scroll to bottom after the UI has been updated
+        await JS.InvokeVoidAsync("scrollElementToBottom", "conversationContainer");
     }
 }

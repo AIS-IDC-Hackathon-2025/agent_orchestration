@@ -20,3 +20,11 @@ window.initializeSignalRConnection = (dotNetHelper) => {
         return console.error(err.toString());
     });
 }
+
+// Add this new function for scrolling to bottom
+window.scrollElementToBottom = (elementId) => {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.scrollTop = element.scrollHeight;
+    }
+}
