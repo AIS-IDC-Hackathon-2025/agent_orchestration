@@ -65,6 +65,12 @@ public partial class Agents : ComponentBase
 
     private async Task StartAsync()
     {
+        if(string.IsNullOrWhiteSpace(tagName))
+        {
+            StatusMessage = "Please enter a valid tag name.";
+            return;
+        }
+
         if (AllDone || IsBusy)
             return;
 
@@ -138,6 +144,7 @@ public partial class Agents : ComponentBase
             s.Status = StepStatus.Pending;
 
         CurrentIndex = 0;
+        tagName = null;
         StatusMessage = "Pipeline reset.";
     }
 
