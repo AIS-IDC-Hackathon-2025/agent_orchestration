@@ -1,6 +1,7 @@
 ﻿using GateKeeper.AI.Shared;
 using GateKeeper.AI.SmartCodeReviewer.Agent;
 using GateKeeper.AI.TagAndChangeLog.Agent;
+using GateKeeper.AI.Trust.Agent;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
@@ -23,6 +24,7 @@ public interface IOrchestratorService
 }
 public class OrchestratorService(
     ITagAndChangeLogAgentDefinition tagAgent,
+    ITrustAgent trustAgent,
     ISmartCodeReviewerAgentDefinition smartCRAgent,
     ILoggerFactory loggerFactory,
     Settings setting) : IOrchestratorService
@@ -30,6 +32,7 @@ public class OrchestratorService(
     private OrchestrationMonitor monitor = null!;
     private Kernel? _managerKernel;
     private Kernel? _tagKernel;
+    private Kernel? _trustKernel;
     private Kernel? _crKernel;
     private StandardMagenticManager? _manager;
     private MagenticOrchestration? _orchestration;
@@ -37,33 +40,53 @@ public class OrchestratorService(
 
     public async Task TestAgent(string message)
     {
+        // Tag and Change Log Agent
+        //var (kernel, agent) = await tagAgent.CreateAgent();
+        // ChatHistoryAgentThread agentThread = new();
+        // await foreach (ChatMessageContent response in agent.InvokeAsync(message, agentThread))
+        // {
+        //     // Display response.
+        //     Console.WriteLine($"{response.Content}");
+        // }
 
-       var (kernel, agent) = await tagAgent.CreateAgent();
-        ChatHistoryAgentThread agentThread = new();
-        await foreach (ChatMessageContent response in agent.InvokeAsync(message, agentThread))
+        // Trust Agent
+        var builder = Kernel.CreateBuilder();
+        builder.Services.AddSingleton(loggerFactory);
+
+        builder.AddAzureOpenAIChatCompletion(
+            deploymentName: setting.AzureOpenAI.ChatModelDeployment,
+            endpoint: setting.AzureOpenAI.Endpoint,
+            apiKey: setting.AzureOpenAI.ApiKey);
+
+        _trustKernel = builder.Build();
+
+        var chatCompletionAgent = trustAgent.CreateAgent(_trustKernel);
+        ChatHistoryAgentThread trustAgentThread = new();
+        await foreach (ChatMessageContent response in chatCompletionAgent.InvokeAsync(message, trustAgentThread))
         {
             // Display response.
             Console.WriteLine($"{response.Content}");
         }
 
+        // Smart Code Reviewer Agent
         //var (kernel, agent, thread) = await smartCRAgent.CreateAgent();
         //await foreach (ChatMessageContent response in agent.InvokeAsync(message, thread))
         //{
         //    // Display response.
         //    Console.WriteLine($"{response.Content}");
         //}
-
-
-
     }
 
     public async Task Create(string input, CancellationToken cancellationToken = default)
     {
         var builder = Kernel.CreateBuilder();
+
         builder.Services.AddSingleton(loggerFactory);
         var tagAndChangeLogAgent = await tagAgent.CreateAgent();
+
         _tagKernel = tagAndChangeLogAgent.Item1;
         var crAgent = await smartCRAgent.CreateAgent();
+
         _crKernel = crAgent.Item1;
 
         monitor = new();

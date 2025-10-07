@@ -24,6 +24,7 @@
     <ProjectReference Include="..\GateKeeper.AI.Shared\GateKeeper.AI.Shared.csproj" />
     <ProjectReference Include="..\GateKeeper.AI.SmartCodeReviewer.Agent\GateKeeper.AI.SmartCodeReviewer.Agent.csproj" />
     <ProjectReference Include="..\GateKeeper.AI.TagAndChangeLog.Agent\GateKeeper.AI.TagAndChangeLog.Agent.csproj" />
+    <ProjectReference Include="..\GateKeeper.AI.Trust.Agent\GateKeeper.AI.Trust.Agent.csproj" />
   </ItemGroup>
 
 </Project>

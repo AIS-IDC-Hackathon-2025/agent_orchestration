@@ -2,12 +2,8 @@
 using GateKeeper.AI.Shared.MCP;
 using GateKeeper.AI.SmartCodeReviewer.Agent;
 using GateKeeper.AI.TagAndChangeLog.Agent;
+using GateKeeper.AI.Trust.Agent;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GateKeeper.AI.Orchestrator;
 
@@ -20,6 +16,7 @@ public static class ServiceCollectionExtensions
             return host;
         });
         services.AddSingleton<ITagAndChangeLogAgentDefinition, TagAndChangeLogAgentDefinition>();
+        services.AddSingleton<ITrustAgent, TrustAgent>();
         services.AddSingleton<ISmartCodeReviewerAgentDefinition, SmartCodeReviewerAgentDefinition>();
 
         // Add Azure services here
