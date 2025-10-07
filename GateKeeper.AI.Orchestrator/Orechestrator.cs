@@ -1,8 +1,10 @@
 ﻿using GateKeeper.AI.Shared;
+using GateKeeper.AI.Shared.Hub;
 using GateKeeper.AI.Shared.Plugin;
 using GateKeeper.AI.SmartCodeReviewer.Agent;
 using GateKeeper.AI.TagAndChangeLog.Agent;
 using GateKeeper.AI.Trust.Agent;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
@@ -28,6 +30,7 @@ public interface IOrchestratorService
     Task Create(string input, CancellationToken cancellationToken = default);
 }
 public class OrchestratorService(
+    IHubContext<AgentsHub> hubContext,
     ITagAndChangeLogAgentDefinition tagAgent,
     ITrustAgent trustAgent,
     ISmartCodeReviewerAgentDefinition smartCRAgent,
@@ -73,6 +76,8 @@ public class OrchestratorService(
         {
             // Display response.
             Console.WriteLine($"{response.Content}");
+
+            await hubContext.Clients.All.SendAsync("ReceiveMessage", response.Content);
         }
     }
 
@@ -84,6 +89,8 @@ public class OrchestratorService(
         {
             // Display response.
             Console.WriteLine($"{response.Content}");
+
+            await hubContext.Clients.All.SendAsync("ReceiveMessage", response.Content);
         }
     }
 
@@ -94,6 +101,8 @@ public class OrchestratorService(
         {
             // Display response.
             Console.WriteLine($"{response.Content}");
+
+            await hubContext.Clients.All.SendAsync("ReceiveMessage", response.Content);
         }
     }
 

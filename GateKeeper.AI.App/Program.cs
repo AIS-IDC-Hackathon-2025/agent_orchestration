@@ -1,5 +1,6 @@
 using GateKeeper.AI.App;
 using GateKeeper.AI.App.Components;
+using GateKeeper.AI.Shared.Hub;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -11,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-
 
 var resourceBuilder = ResourceBuilder
     .CreateDefault()
@@ -45,13 +45,24 @@ using var loggerFactory = LoggerFactory.Create(builder =>
     });
     builder.SetMinimumLevel(LogLevel.Information);
 });
+
 builder.Services.AddSingleton(loggerFactory);
 builder.Services.AddServices(builder.Configuration);
+
+// SignalR with Azure SignalR Service
+var signalRConnectionString = builder.Configuration["Azure:SignalR:ConnectionString"] 
+    ?? Environment.GetEnvironmentVariable("AZURE_SIGNALR_CONNECTIONSTRING");
+
+if (string.IsNullOrEmpty(signalRConnectionString))
+{
+    throw new InvalidOperationException("Azure SignalR connection string not found. Please provide it in configuration or environment variable AZURE_SIGNALR_CONNECTIONSTRING.");
+}
+
+builder
+    .Services.AddSignalR(o => { o.EnableDetailedErrors = true; })
+    .AddAzureSignalR(signalRConnectionString);
+
 var app = builder.Build();
-
-
-
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -63,11 +74,12 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
 app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapHub<AgentsHub>("/agentshub");
 
 app.Run();

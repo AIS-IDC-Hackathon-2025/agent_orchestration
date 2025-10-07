@@ -1,17 +1,52 @@
-﻿using GateKeeper.AI.Orchestrator;
+﻿using Azure;
+using GateKeeper.AI.App.Models;
+using GateKeeper.AI.Orchestrator;
+using GateKeeper.AI.Shared.Hub;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.JSInterop;
 
 namespace GateKeeper.AI.App.Components.Pages;
 
 public partial class Agents : ComponentBase
 {
     private string? tagName;
+
     private string? prompt;
 
-    [Inject]
-    private IOrchestratorService OrchestratorService { get; set; } = default!;
+    private readonly List<ChatMessage> conversationHistory = new();
+
+    private DotNetObjectReference<Agents>? objRef;
+
+    private string? statusMessage;
+
+    private bool isReady = false;
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    [Inject] private IOrchestratorService OrchestratorService { get; set; } = default!;
+
+
+    [Inject] IHubContext<AgentsHub> HubContext { get; set; } = default!;
 
     private enum StepStatus { Pending, InProgress, Completed, Failed }
+
+    protected override void OnInitialized()
+    {
+        objRef ??= DotNetObjectReference.Create(this);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initializeSignalRConnection", objRef);
+            isReady = true;
+            await InvokeAsync(StateHasChanged);
+        }
+
+        await Task.CompletedTask;
+    }
 
     private sealed class PipelineStep
     {
@@ -33,8 +68,6 @@ public partial class Agents : ComponentBase
     private CancellationTokenSource? _cts;
 
     private bool IsBusy => CurrentIndex < Steps.Count && Steps[CurrentIndex].Status == StepStatus.InProgress;
-
-    private string? StatusMessage;
 
     private int CompletedCount => Steps.Count(s => s.Status == StepStatus.Completed);
 
@@ -65,9 +98,10 @@ public partial class Agents : ComponentBase
 
     private async Task StartAsync()
     {
-        if(string.IsNullOrWhiteSpace(tagName))
+        if (string.IsNullOrWhiteSpace(tagName))
         {
-            StatusMessage = "Please enter a valid tag name.";
+            statusMessage = "Please enter a valid tag name.";
+            await HubContext.Clients.All.SendAsync("ReceiveMessage", statusMessage);
             return;
         }
 
@@ -83,7 +117,8 @@ public partial class Agents : ComponentBase
         _cts = new CancellationTokenSource();
 
         step.Status = StepStatus.InProgress;
-        StatusMessage = $"Starting {step.Name}...";
+        statusMessage = $"Starting {step.Name}...";
+        await HubContext.Clients.All.SendAsync("ReceiveMessage", statusMessage);
         StateHasChanged();
 
         try
@@ -110,7 +145,8 @@ public partial class Agents : ComponentBase
             }
 
             step.Status = StepStatus.Completed;
-            StatusMessage = $"{step.Name} completed successfully.";
+            statusMessage = $"{step.Name} completed successfully.";
+            await HubContext.Clients.All.SendAsync("ReceiveMessage", statusMessage);
 
             if (CurrentIndex < Steps.Count - 1)
             {
@@ -119,17 +155,22 @@ public partial class Agents : ComponentBase
                 await StartAsync();
             }
             else
-                StatusMessage = "Pipeline finished.";
+            {
+                statusMessage = "Pipeline finished.";
+                await HubContext.Clients.All.SendAsync("ReceiveMessage", statusMessage);
+            }
         }
         catch (TaskCanceledException)
         {
-            StatusMessage = $"{step.Name} canceled.";
+            statusMessage = $"{step.Name} canceled.";
+            await HubContext.Clients.All.SendAsync("ReceiveMessage", statusMessage);
             step.Status = StepStatus.Pending;
         }
         catch (Exception ex)
         {
             step.Status = StepStatus.Failed;
-            StatusMessage = $"{step.Name} failed: {ex.Message}";
+            statusMessage = $"{step.Name} failed: {ex.Message}";
+            await HubContext.Clients.All.SendAsync("ReceiveMessage", statusMessage);
         }
         finally
         {
@@ -137,7 +178,7 @@ public partial class Agents : ComponentBase
         }
     }
 
-    private void Reset()
+    private async Task ResetAsync()
     {
         if (IsBusy)
             return;
@@ -149,12 +190,22 @@ public partial class Agents : ComponentBase
 
         CurrentIndex = 0;
         tagName = null;
-        StatusMessage = "Pipeline reset.";
+        statusMessage = "Pipeline reset.";
+        await HubContext.Clients.All.SendAsync("ReceiveMessage", statusMessage);
+
+        await InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
         _cts?.Cancel();
         _cts?.Dispose();
+    }
+
+    [JSInvokable]
+    public void ChartCompletetionsStreamJs(string content)
+    {
+        conversationHistory.Add(new ChatMessage(DateTime.Now, content!));
+        StateHasChanged();
     }
 }
