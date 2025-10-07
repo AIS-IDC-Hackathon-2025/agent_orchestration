@@ -113,7 +113,11 @@ public partial class Agents : ComponentBase
             StatusMessage = $"{step.Name} completed successfully.";
 
             if (CurrentIndex < Steps.Count - 1)
+            {
                 CurrentIndex++;
+                await Task.Delay(2000); // Small delay for better UX
+                await StartAsync();
+            }
             else
                 StatusMessage = "Pipeline finished.";
         }
