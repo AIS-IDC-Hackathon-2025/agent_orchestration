@@ -399,7 +399,7 @@ public sealed class GitHubPlugin(Settings settings)
     }
 
     [KernelFunction]
-    [Description("Generate release notes and commit them directly to the GitHub repository in ReleaseNotes folder")]
+    [Description("Generate release notes or vulnerability report, commit them directly to the GitHub repository in `Releases` folder")]
     public async Task<string> GenerateAndSaveChangeLogAsync(
         string organization,
         string repo,
@@ -852,7 +852,14 @@ public sealed class GitHubPlugin(Settings settings)
         string path = $"/repos/{organization}/{repo}/dependency-graph/compare/{baseRef}...{headRef}";
         Console.WriteLine($"📋 Comparing dependencies for {organization}/{repo} between {baseRef} and {headRef}");
         JsonDocument response = await MakeRequestAsync(client, path);
-        return response.Deserialize<GitHubModels.DependencyComparison>() ?? throw new InvalidDataException($"Request failed: {nameof(CompareDependenciesAsync)}");
+        try
+        {
+            return response.Deserialize<GitHubModels.DependencyComparison>() ?? throw new InvalidDataException($"Request failed: {nameof(CompareDependenciesAsync)}");
+        }
+        catch
+        {
+            return new GitHubModels.DependencyComparison();
+        }
     }
     #endregion
 

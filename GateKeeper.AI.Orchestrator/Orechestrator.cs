@@ -1,4 +1,5 @@
 ﻿using GateKeeper.AI.Shared;
+using GateKeeper.AI.Shared.Plugin;
 using GateKeeper.AI.SmartCodeReviewer.Agent;
 using GateKeeper.AI.TagAndChangeLog.Agent;
 using GateKeeper.AI.Trust.Agent;
@@ -11,16 +12,20 @@ using Microsoft.SemanticKernel.Agents.Orchestration;
 using Microsoft.SemanticKernel.Agents.Runtime.InProcess;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
-using ModelContextProtocol.Protocol;
-//using Microsoft.SemanticKernel.Connectors.OpenAI;
 
 namespace GateKeeper.AI.Orchestrator;
 
 public interface IOrchestratorService
 {
-    Task Create(string input, CancellationToken cancellationToken = default);
+    void InitializeKernels();
 
-    Task TestAgent(string message);
+    Task RunTaggingAndChangeLogAsync(string message);
+
+    Task RunTrustAgentAsync(string message);
+
+    Task RunSmartCodeReviewAsync(string message);
+
+    Task Create(string input, CancellationToken cancellationToken = default);
 }
 public class OrchestratorService(
     ITagAndChangeLogAgentDefinition tagAgent,
@@ -38,43 +43,58 @@ public class OrchestratorService(
     private MagenticOrchestration? _orchestration;
 
 
-    public async Task TestAgent(string message)
+    public void InitializeKernels()
     {
-        // Tag and Change Log Agent
-        //var (kernel, agent) = await tagAgent.CreateAgent();
-        // ChatHistoryAgentThread agentThread = new();
-        // await foreach (ChatMessageContent response in agent.InvokeAsync(message, agentThread))
-        // {
-        //     // Display response.
-        //     Console.WriteLine($"{response.Content}");
-        // }
-
-        // Trust Agent
         var builder = Kernel.CreateBuilder();
-        builder.Services.AddSingleton(loggerFactory);
 
+        builder.Services.AddSingleton(loggerFactory);
         builder.AddAzureOpenAIChatCompletion(
             deploymentName: setting.AzureOpenAI.ChatModelDeployment,
             endpoint: setting.AzureOpenAI.Endpoint,
             apiKey: setting.AzureOpenAI.ApiKey);
 
-        _trustKernel = builder.Build();
+        GitHubPlugin githubPlugin = new(setting);
 
-        var chatCompletionAgent = trustAgent.CreateAgent(_trustKernel);
+        builder.Plugins.AddFromObject(githubPlugin);
+
+        _managerKernel = builder.Build();
+    }
+
+    //public async Task InitializeOrchestration()
+    //{
+        
+    //}
+
+    public async Task RunTaggingAndChangeLogAsync(string message)
+    {
+        var (kernel, agent) = await tagAgent.CreateAgent();
+        ChatHistoryAgentThread agentThread = new();
+        await foreach (ChatMessageContent response in agent.InvokeAsync(message, agentThread))
+        {
+            // Display response.
+            Console.WriteLine($"{response.Content}");
+        }
+    }
+
+    public async Task RunTrustAgentAsync(string message)
+    {
+        var chatCompletionAgent = trustAgent.CreateAgent(_managerKernel!);
         ChatHistoryAgentThread trustAgentThread = new();
         await foreach (ChatMessageContent response in chatCompletionAgent.InvokeAsync(message, trustAgentThread))
         {
             // Display response.
             Console.WriteLine($"{response.Content}");
         }
+    }
 
-        // Smart Code Reviewer Agent
-        //var (kernel, agent, thread) = await smartCRAgent.CreateAgent();
-        //await foreach (ChatMessageContent response in agent.InvokeAsync(message, thread))
-        //{
-        //    // Display response.
-        //    Console.WriteLine($"{response.Content}");
-        //}
+    public async Task RunSmartCodeReviewAsync(string message)
+    {
+        var (kernel, agent, thread) = await smartCRAgent.CreateAgent();
+        await foreach (ChatMessageContent response in agent.InvokeAsync(message, thread))
+        {
+            // Display response.
+            Console.WriteLine($"{response.Content}");
+        }
     }
 
     public async Task Create(string input, CancellationToken cancellationToken = default)
@@ -158,5 +178,5 @@ public class OrchestratorService(
 
     }
 
-
+    public Task TestAgent(string message) => throw new NotImplementedException();
 }

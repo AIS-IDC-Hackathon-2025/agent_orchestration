@@ -1,9 +1,16 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using GateKeeper.AI.Orchestrator;
+using Microsoft.AspNetCore.Components;
 
 namespace GateKeeper.AI.App.Components.Pages;
 
 public partial class Agents : ComponentBase
 {
+    private string? tagName;
+    private string? prompt;
+
+    [Inject]
+    private IOrchestratorService OrchestratorService { get; set; } = default!;
+
     private enum StepStatus { Pending, InProgress, Completed, Failed }
 
     private sealed class PipelineStep
@@ -18,7 +25,7 @@ public partial class Agents : ComponentBase
         new("Initialize"),
         new("Tagging and Change log"),
         new("Trust"),
-        new("Smar code review"),
+        new("Smart code review"),
     ];
 
     private int CurrentIndex { get; set; } = 0;
@@ -75,7 +82,26 @@ public partial class Agents : ComponentBase
 
         try
         {
-            await Task.Delay(TimeSpan.FromSeconds(2.5), _cts.Token);
+            switch (step.Name)
+            {
+                case "Initialize":
+                    OrchestratorService.InitializeKernels();
+                    break;
+                case "Tagging and Change log":
+                    string tagAndChangeLogAgentMessage = $"create tag v{tagName} and generate release notes and push it to main on repo copilot_security";
+                    await OrchestratorService.RunTaggingAndChangeLogAsync(tagAndChangeLogAgentMessage);
+                    break;
+                case "Trust":
+                    string trustAgentMessage = $"Get vulnerabilities and license risk scanning report for the tags v1.2.509 and v{tagName} and then push the generated report to `main` branch on repo `copilot_security` under `Releases` folder";
+                    await OrchestratorService.RunTrustAgentAsync(trustAgentMessage);
+                    break;
+                case "Smart code review":
+                    string smartCRAgentMessage = $"Do a code review for the tag v{tagName}";
+                    await OrchestratorService.RunSmartCodeReviewAsync(smartCRAgentMessage);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unknown step: {step.Name}");
+            }
 
             step.Status = StepStatus.Completed;
             StatusMessage = $"{step.Name} completed successfully.";

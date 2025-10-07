@@ -4,8 +4,13 @@
 <h3 class="mb-4">Release Gatekeeper</h3>
 
 <div class="mb-3">
+    <label for="txtTag" class="form-label">Enter Tag Name</label>
+    <InputText @bind-Value="tagName" class="form-control" id="txtTag" placeholder="v1.2.510" />
+</div>
+
+<div class="mb-3">
     <label for="txtPrompt" class="form-label">Enter Prompt</label>
-    <textarea class="form-control" id="txtPrompt" rows="3"></textarea>
+    <InputTextArea @bind-Value="prompt" class="form-control" id="txtPrompt" rows="3"></InputTextArea>
 </div>
 
 <div class="d-flex gap-2 my-4">

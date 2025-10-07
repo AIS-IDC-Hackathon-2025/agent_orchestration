@@ -20,7 +20,6 @@ public class TrustAgent : ITrustAgent
                             ## Repository Context
                             - **Organization:** AIS-IDC-Hackathon-2025
                             - **Repository:** copilot_security
-                            - **Branch:** features/codeql-updates
                         
                             ## Available Operations
                             You can invoke the following GitHub API operations:
