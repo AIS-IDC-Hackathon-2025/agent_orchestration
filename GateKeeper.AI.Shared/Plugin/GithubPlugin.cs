@@ -431,6 +431,42 @@ public sealed class GitHubPlugin(Settings settings)
         return message;
     }
 
+    [KernelFunction]
+    [Description("Generate and upload a vulnerability report to GitHub repository in Releases folder")]
+    public async Task<string> UploadVulnerabilityReportAsync(
+        string organization,
+        string repo,
+        [Description("Markdown content of the vulnerability report")]
+        string reportContent,
+        [Description("Title for the vulnerability report")]
+        string reportTitle,
+        [Description("Branch to commit to. Defaults to 'main'.")]
+        string branch = "main")
+    {
+        if (string.IsNullOrWhiteSpace(reportContent))
+        {
+            throw new ArgumentException("Report content cannot be empty", nameof(reportContent));
+        }
+
+        // Create filename with timestamp and sanitized title
+        var sanitizedTitle = string.Join("_", reportTitle.Split(Path.GetInvalidFileNameChars()));
+        var fileName = $"vulnerability_report_{sanitizedTitle}_{DateTime.Now:yyyyMMdd_HHmmss}.md";
+        var filePath = $"Releases/{fileName}";
+
+        Console.WriteLine($"📝 Creating vulnerability report in repository: {organization}/{repo}");
+        Console.WriteLine($"📄 File path: {filePath}");
+        Console.WriteLine($"📄 Content size: {reportContent.Length:N0} characters");
+
+        // Create/update the file in the GitHub repository
+        var result = await CreateVulnerabilityFileInRepositoryAsync(organization, repo, filePath, reportContent, branch);
+
+        var message = $"✅ Vulnerability report committed to {organization}/{repo} at {filePath}";
+        Console.WriteLine(message);
+        Console.WriteLine($"🔗 Commit URL: {result.Commit?.HtmlUrl}");
+
+        return message;
+    }
+
     private async Task<GitHubModels.CreateFileResponse> CreateFileInRepositoryAsync(
         string organization,
         string repo,
@@ -473,6 +509,42 @@ public sealed class GitHubPlugin(Settings settings)
                throw new InvalidDataException($"Request failed: {nameof(CreateFileInRepositoryAsync)}");
     }
 
+    private async Task<GitHubModels.CreateFileResponse> CreateVulnerabilityFileInRepositoryAsync(
+        string organization,
+        string repo,
+        string filePath,
+        string content,
+        string branch)
+    {
+        using HttpClient client = this.CreateClient();
+
+        // Get authenticated user for committer info
+        var user = await GetUserProfileAsync();
+
+        // Create commit message
+        var commitMessage = $"security: add vulnerability assessment report {DateTime.Now:yyyy-MM-dd}";
+
+        // Encode content to Base64
+        var base64Content = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(content));
+
+        var createFileRequest = new GitHubModels.CreateFileRequest
+        {
+            Message = commitMessage,
+            Content = base64Content,
+            Branch = branch,
+            Committer = new GitHubModels.GitCommitter
+            {
+                Name = user.Name ?? user.Login,
+                Email = "noreply@github.com"
+            }
+        };
+
+        string path = $"/repos/{organization}/{repo}/contents/{filePath}";
+        JsonDocument response = await MakePutRequestAsync(client, path, createFileRequest);
+
+        return response.Deserialize<GitHubModels.CreateFileResponse>() ??
+                throw new InvalidDataException($"Request failed: {nameof(CreateVulnerabilityFileInRepositoryAsync)}");
+    }
 
     private async Task<GitHubModels.ChangeLogEntry> CreateChangeLogEntry(string organization, string repo, GitHubModels.CommitDetail commit)
     {
